@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Simple script to list all entities a list o policies is attached to
+Simple script to list all entities a list of policies is attached to
 """
 
 import sys
