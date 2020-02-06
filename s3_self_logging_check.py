@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
 
-import json
 import boto3
 import colorama
 from colorama import Fore, Style
 
 profile='default'
 region='us-east-1'
+less_verbose=True
 
-##         print("\n", Fore.GREEN, i, Style.RESET_ALL)
-
-#create boto session and client
+# create boto session and client
 session = boto3.Session(profile_name = profile)
 s3_client = session.client('s3', region_name=region)
 
-
-
+# get a list of all buckets in the account
 buckets=s3_client.list_buckets()['Buckets']
 
-print(s3_client.get_bucket_logging(Bucket='elecotest')['LoggingEnabled'])
-
+# check is server logging is enabled and if it the target bucket is the same as the source bucket
 for bucket in buckets:
     try:
-        if s3_client.get_bucket_logging(Bucket=bucket['Name'])['LoggingEnabled']['TargetBucket'] == bucket['Name']:
-            print(Fore.RED, bucket['Name'], "logs to itself.\n", Style.RESET_ALL)
+        logging_bucket=s3_client.get_bucket_logging(Bucket=bucket['Name'])['LoggingEnabled']['TargetBucket']
+        if logging_bucket != bucket['Name']:
+            print(Fore.CYAN, bucket['Name'], "logs to", logging_bucket,  Style.RESET_ALL)
         else:
-            print(Fore.ORANGE, bucket['Name'], "logs to {}.\n".format(bucket['Name']['LoggingEnabled']['TargetBucket']), Style.RESET_ALL)
+            print(Fore.RED, bucket['Name'], "logs to itself.", Style.RESET_ALL)            
     except:
-        print(Fore.GREEN, "{} does not have server logging enabled.\n".format(bucket['Name']), Style.RESET_ALL)
+        if less_verbose:
+            pass
+        else:
+            print(Fore.GREEN, "{} does not have server logging enabled.".format(bucket['Name']), Style.RESET_ALL)
